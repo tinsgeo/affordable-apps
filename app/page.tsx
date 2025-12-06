@@ -8,7 +8,7 @@ export default function InteractiveLanding() {
   const [spotsLeft, setSpotsLeft] = useState(487);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
-  const [activeCard, setActiveCard] = useState(null);
+  const [activeCard, setActiveCard] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const fullText = "a modern coffee shop website with menu and location";
