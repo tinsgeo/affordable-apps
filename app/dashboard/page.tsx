@@ -463,7 +463,7 @@ export default function Dashboard() {
                   {/* DEPLOY LIVE BUTTON — ADD THIS BLOCK */}
                 <button
                   onClick={async () => {
-                    const projectName = prompt("Name your project (e.g. my-restaurant-site)", `site-${Date.now()}`);
+                    const projectName = window.prompt?.("Name your project (e.g. my-restaurant-site)", `site-${Date.now()}`) || `site-${Date.now()}`;
                     if (!projectName) return;
                 
                     const res = await fetch('/api/deploy', {
