@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { 
-  Sparkles, LogOut, Wand2, Eye, Code, Download, 
+import {
+  Sparkles, LogOut, Wand2, Eye, Code, Download,
   MessageSquare, Palette, Layout, Zap, CheckCircle,
-  ChevronRight, RefreshCw, HelpCircle, Lightbulb
+  ChevronRight, RefreshCw, HelpCircle, Lightbulb, Globe   // ← ADD THIS
 } from 'lucide-react';
 
 type Step = 'type' | 'style' | 'features' | 'review' | 'generate';
@@ -460,6 +460,33 @@ export default function Dashboard() {
                     {showPreview ? <Code className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     {showPreview ? 'View Code' : 'View Preview'}
                   </button>
+                  {/* DEPLOY LIVE BUTTON — ADD THIS BLOCK */}
+                <button
+                  onClick={async () => {
+                    const projectName = prompt("Name your project (e.g. my-restaurant-site)", `site-${Date.now()}`);
+                    if (!projectName) return;
+                
+                    const res = await fetch('/api/deploy', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ html, projectName })
+                    });
+                
+                    const data = await res.json();
+                
+                    if (data.url) {
+                      alert(`Deployed! Live at: ${data.url}`);
+                      window.open(data.url, '_blank');
+                    } else {
+                      alert('Deploy failed: ' + (data.error || 'Unknown error'));
+                    }
+                  }}
+                  disabled={loading || !html}
+                  className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg font-bold transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <Globe className="w-5 h-5" />
+                  Deploy Live
+                </button>
                 </div>
 
                 <div className="border-4 border-purple-600 rounded-2xl overflow-hidden shadow-2xl">
