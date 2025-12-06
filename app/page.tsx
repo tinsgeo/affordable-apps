@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Zap, Clock, Users, ArrowRight, Play, CheckCircle, Star } from 'lucide-react';
+import { Sparkles, Zap, Clock, Users, ArrowRight, Play, CheckCircle, Star, X } from 'lucide-react';
+import { SignIn } from '@/components/SignIn';
 
 export default function InteractiveLanding() {
   const [timeLeft, setTimeLeft] = useState({ days: 6, hours: 23, mins: 59, secs: 59 });
@@ -10,6 +11,7 @@ export default function InteractiveLanding() {
   const [typedText, setTypedText] = useState('');
   const [activeCard, setActiveCard] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const fullText = "a modern coffee shop website with menu and location";
 
@@ -59,6 +61,10 @@ export default function InteractiveLanding() {
     { initial: 'A', name: 'Alex Kim', role: 'Designer', text: 'The AI writes better code than most devs I know.', color: 'bg-purple-500' }
   ];
 
+  const handleAuthClick = () => {
+    setShowAuthModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Animated gradient background */}
@@ -77,6 +83,29 @@ export default function InteractiveLanding() {
         }}
       />
 
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="relative bg-gradient-to-br from-gray-900 to-black border border-purple-500/30 rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-purple-500/20">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h2 className="text-2xl font-bold">Affordable Apps</h2>
+            </div>
+            
+            <SignIn onSuccess={() => setShowAuthModal(false)} />
+          </div>
+        </div>
+      )}
+
       <div className="relative z-10">
         {/* Header */}
         <header className="container mx-auto px-6 py-6 flex justify-between items-center">
@@ -86,14 +115,17 @@ export default function InteractiveLanding() {
             </div>
             <span className="text-xl font-bold">Affordable Apps</span>
           </div>
-          <button className="px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-all hover:scale-105 active:scale-95">
+          <button 
+            onClick={handleAuthClick}
+            className="px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-all hover:scale-105 active:scale-95"
+          >
             Sign In
           </button>
         </header>
 
         {/* Countdown Banner */}
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 py-3 text-center animate-pulse">
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex items-center justify-center gap-6 flex-wrap">
             <span className="font-semibold">First 500 members get lifetime 50% off</span>
             <div className="flex gap-3">
               <div className="bg-black/30 px-3 py-1 rounded backdrop-blur">
@@ -123,7 +155,7 @@ export default function InteractiveLanding() {
             <span className="text-sm">AI-Powered Website Builder</span>
           </div>
           
-          <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight">
             Your Website Builds Itself<br />In Under 15 Seconds
           </h1>
           
@@ -167,8 +199,11 @@ export default function InteractiveLanding() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-4">
-            <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
-              Sign In
+            <button 
+              onClick={handleAuthClick}
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+            >
+              Get Started Free
               <ArrowRight className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2 text-gray-400 text-sm">
@@ -258,12 +293,23 @@ export default function InteractiveLanding() {
             <h2 className="text-4xl font-bold mb-4">Be One of the First 500</h2>
             <p className="text-xl text-gray-300 mb-8">Lifetime 50% off + early access to new features</p>
             
-            <button className="px-10 py-5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full font-bold text-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all hover:scale-105 active:scale-95 mb-6 flex items-center gap-3 mx-auto">
-              Sign In
+            <button 
+              onClick={handleAuthClick}
+              className="px-10 py-5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full font-bold text-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all hover:scale-105 active:scale-95 mb-6 flex items-center gap-3 mx-auto"
+            >
+              Get Started Free
               <Zap className="w-6 h-6" />
             </button>
             
-            <p className="text-gray-400">Don't have an account? <span className="text-purple-400 font-semibold cursor-pointer hover:underline">Sign up free</span></p>
+            <p className="text-gray-400">
+              Don't have an account? 
+              <button 
+                onClick={handleAuthClick}
+                className="text-purple-400 font-semibold hover:underline ml-1"
+              >
+                Sign up free
+              </button>
+            </p>
             
             <div className="mt-8 inline-flex items-center gap-2 bg-yellow-500/20 border border-yellow-500/30 rounded-full px-6 py-3">
               <Users className="w-5 h-5 text-yellow-400" />
