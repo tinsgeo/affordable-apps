@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import {
-  Sparkles, LogOut, Wand2, Eye, Code, Download,
+import { 
+  Sparkles, LogOut, Wand2, Eye, Code, Download, 
   MessageSquare, Palette, Layout, Zap, CheckCircle,
-  ChevronRight, RefreshCw, HelpCircle, Lightbulb, Globe   // ← ADD THIS
+  ChevronRight, RefreshCw, HelpCircle, Lightbulb, AlertCircle
 } from 'lucide-react';
 
 type Step = 'type' | 'style' | 'features' | 'review' | 'generate';
@@ -30,7 +30,8 @@ export default function Dashboard() {
   const [prompt, setPrompt] = useState('');
   const [html, setHtml] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [error, setError] = useState('');
+  const [showPreview, setShowPreview] = useState(true);
   const router = useRouter();
 
   const websiteTypes = [
@@ -68,7 +69,6 @@ export default function Dashboard() {
     { id: 'search', name: 'Search Function', icon: '🔍' }
   ];
 
-  // Auto-generate prompt based on selections
   useEffect(() => {
     if (config.type && config.style) {
       generatePrompt();
@@ -97,69 +97,68 @@ export default function Dashboard() {
     setPrompt(promptText);
   };
 
-const generate = async () => {
-  setLoading(true);
-  setError('');
-  setShowPreview(true);
-  
-  console.log('🚀 Starting generation...');
-  console.log('📝 Prompt:', prompt);
-  
-  try {
-    console.log('📡 Fetching /api/generate...');
+  const generate = async () => {
+    setLoading(true);
+    setError('');
+    setShowPreview(true);
     
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-
-    console.log('📊 Response status:', res.status);
+    console.log('🚀 Starting generation...');
+    console.log('📝 Prompt:', prompt);
     
-    // Try to get the response text first
-    const responseText = await res.text();
-    console.log('📄 Response text (first 200 chars):', responseText.substring(0, 200));
-    
-    // Try to parse as JSON
-    let data;
     try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('❌ Failed to parse JSON:', parseError);
-      throw new Error(`Server returned invalid JSON. Status: ${res.status}. Response: ${responseText.substring(0, 100)}`);
+      console.log('📡 Fetching /api/generate...');
+      
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      console.log('📊 Response status:', res.status);
+      
+      const responseText = await res.text();
+      console.log('📄 Response text (first 200 chars):', responseText.substring(0, 200));
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse JSON:', parseError);
+        throw new Error(`Server returned invalid JSON. Status: ${res.status}. Response: ${responseText.substring(0, 100)}`);
+      }
+      
+      console.log('✅ Parsed data:', data);
+      
+      if (!res.ok) {
+        throw new Error(data.error || data.details || `HTTP ${res.status}`);
+      }
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      if (!data.html) {
+        throw new Error('No HTML received from API');
+      }
+      
+      setHtml(data.html);
+      console.log('🎉 HTML set successfully, length:', data.html.length);
+      
+    } catch (error: any) {
+      console.error('❌ Generation error:', error);
+      setError(error.message || 'Failed to generate website. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    
-    console.log('✅ Parsed data:', data);
-    
-    if (!res.ok) {
-      throw new Error(data.error || data.details || `HTTP ${res.status}`);
-    }
-    
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    
-    if (!data.html) {
-      throw new Error('No HTML received from API');
-    }
-    
-    setHtml(data.html);
-    console.log('🎉 HTML set successfully, length:', data.html.length);
-    
-  } catch (error: any) {
-    console.error('❌ Generation error:', error);
-    setError(error.message || 'Failed to generate website. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const resetBuilder = () => {
     setConfig({ type: '', style: '', features: [], customDetails: '' });
     setCurrentStep('type');
     setPrompt('');
     setHtml('');
-    setShowPreview(false);
+    setError('');
+    setShowPreview(true);
   };
 
   const toggleFeature = (featureId: string) => {
@@ -459,19 +458,43 @@ const generate = async () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-4xl font-bold mb-4">
-                {loading ? 'Claude is building your website...' : html ? 'Your website is ready!' : 'Generating...'}
+                {loading ? 'Claude is building your website...' : html ? 'Your website is ready!' : error ? 'Generation Failed' : 'Generating...'}
               </h2>
               {loading && (
-                <div className="flex items-center justify-center gap-3 text-purple-400">
-                  <RefreshCw className="w-6 h-6 animate-spin" />
-                  <span className="text-lg">This usually takes 10-20 seconds</span>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-3 text-purple-400">
+                    <RefreshCw className="w-6 h-6 animate-spin" />
+                    <span className="text-lg">This usually takes 20-60 seconds</span>
+                  </div>
+                  <p className="text-sm text-gray-400">Check browser console (F12) for detailed progress...</p>
+                </div>
+              )}
+              
+              {error && (
+                <div className="max-w-2xl mx-auto mt-8 p-6 bg-red-900/20 border-2 border-red-500 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
+                    <div className="flex-1 text-left">
+                      <h3 className="font-bold text-red-400 mb-2">Error</h3>
+                      <p className="text-sm text-gray-300 mb-4">{error}</p>
+                      <button
+                        onClick={() => {
+                          setError('');
+                          generate();
+                        }}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-bold text-sm transition-all"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
-            {html && (
+            {html && !error && (
               <>
-                <div className="flex justify-center gap-4 mb-8">
+                <div className="flex justify-center gap-4 mb-8 flex-wrap">
                   <button
                     onClick={resetBuilder}
                     className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-bold transition-all flex items-center gap-2"
@@ -500,32 +523,6 @@ const generate = async () => {
                     {showPreview ? <Code className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     {showPreview ? 'View Code' : 'View Preview'}
                   </button>
-                  <button
-  onClick={async () => {
-    const projectName = window.prompt?.("Name your project (e.g. my-restaurant-site)", `site-${Date.now()}`) || `site-${Date.now()}`;
-    if (!projectName) return;
-
-    const res = await fetch('/api/deploy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html, projectName })
-    });
-
-    const data = await res.json();
-
-    if (data.url) {
-      alert(`Deployed! Live at: ${data.url}`);
-      window.open(data.url, '_blank');
-    } else {
-      alert('Deploy failed: ' + (data.error || 'Unknown error'));
-    }
-  }}
-  disabled={loading || !html}
-  className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg font-bold transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
->
-  <Globe className="w-5 h-5" />
-  Deploy Live
-</button>
                 </div>
 
                 <div className="border-4 border-purple-600 rounded-2xl overflow-hidden shadow-2xl">
