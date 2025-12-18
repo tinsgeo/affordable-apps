@@ -75,6 +75,18 @@ export default function Dashboard() {
     }
   }, [config]);
 
+  // Update iframe content when html changes
+  useEffect(() => {
+    if (html && showPreview) {
+      const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(html);
+        iframe.contentWindow.document.close();
+      }
+    }
+  }, [html, showPreview]);
+
   const generatePrompt = () => {
     const typeDesc = websiteTypes.find(t => t.id === config.type)?.name || '';
     const styleDesc = styleOptions.find(s => s.id === config.style)?.name || '';
@@ -528,9 +540,9 @@ export default function Dashboard() {
                 <div className="border-4 border-purple-600 rounded-2xl overflow-hidden shadow-2xl">
                   {showPreview ? (
                     <iframe 
-                      srcDoc={html} 
+                      id="preview-iframe"
                       className="w-full h-[800px] bg-white" 
-                      sandbox="allow-scripts allow-same-origin"
+                      sandbox="allow-scripts allow-same-origin allow-forms"
                       title="Website Preview"
                     />
                   ) : (
