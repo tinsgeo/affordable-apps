@@ -29,6 +29,7 @@ export default function Dashboard() {
   });
   const [prompt, setPrompt] = useState('');
   const [html, setHtml] = useState('');
+  const [previewUrl, setPreviewUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPreview, setShowPreview] = useState(true);
@@ -77,15 +78,24 @@ export default function Dashboard() {
 
   // Update iframe content when html changes
   useEffect(() => {
-    if (html && showPreview) {
-      const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.document.open();
-        iframe.contentWindow.document.write(html);
-        iframe.contentWindow.document.close();
+    if (html) {
+      // Clean up old URL
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
       }
+      
+      // Create blob URL for preview
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
     }
-  }, [html, showPreview]);
+    
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [html]);
 
   const generatePrompt = () => {
     const typeDesc = websiteTypes.find(t => t.id === config.type)?.name || '';
@@ -169,6 +179,7 @@ export default function Dashboard() {
     setCurrentStep('type');
     setPrompt('');
     setHtml('');
+    setPreviewUrl('');
     setError('');
     setShowPreview(true);
   };
@@ -539,12 +550,17 @@ export default function Dashboard() {
 
                 <div className="border-4 border-purple-600 rounded-2xl overflow-hidden shadow-2xl">
                   {showPreview ? (
-                    <iframe 
-                      id="preview-iframe"
-                      className="w-full h-[800px] bg-white" 
-                      sandbox="allow-scripts allow-same-origin allow-forms"
-                      title="Website Preview"
-                    />
+                    previewUrl ? (
+                      <iframe 
+                        src={previewUrl}
+                        className="w-full h-[800px] bg-white" 
+                        title="Website Preview"
+                      />
+                    ) : (
+                      <div className="w-full h-[800px] bg-gray-900 flex items-center justify-center">
+                        <p className="text-gray-400">Loading preview...</p>
+                      </div>
+                    )
                   ) : (
                     <pre className="w-full h-[800px] overflow-auto p-6 bg-gray-950 text-sm">
                       <code>{html}</code>
