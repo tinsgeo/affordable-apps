@@ -529,8 +529,8 @@ export default function Dashboard() {
                   {showPreview ? (
                     <iframe 
                       srcDoc={html} 
-                      className="w-full h-[800px]" 
-                      sandbox="allow-scripts"
+                      className="w-full h-[800px] bg-white" 
+                      sandbox="allow-scripts allow-same-origin"
                       title="Website Preview"
                     />
                   ) : (
