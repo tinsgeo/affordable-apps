@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 4096,
+          model: 'claude-opus-4-5-20251101',
+          max_tokens: 16384,
           messages: [{
             role: 'user',
             content: `You are an expert web developer. Create a complete, beautiful, responsive HTML website based on this description: "${prompt}"
