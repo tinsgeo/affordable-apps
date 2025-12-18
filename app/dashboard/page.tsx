@@ -219,7 +219,7 @@ export default function Dashboard() {
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">AI Website Builder</h1>
+              <h1 className="text-xl font-bold">Affordable Apps</h1>
               <p className="text-xs text-gray-400">{auth.currentUser?.email}</p>
             </div>
           </div>
