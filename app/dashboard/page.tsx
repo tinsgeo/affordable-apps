@@ -97,22 +97,62 @@ export default function Dashboard() {
     setPrompt(promptText);
   };
 
-  const generate = async () => {
-    setLoading(true);
-    setShowPreview(true);
+const generate = async () => {
+  setLoading(true);
+  setError('');
+  setShowPreview(true);
+  
+  console.log('🚀 Starting generation...');
+  console.log('📝 Prompt:', prompt);
+  
+  try {
+    console.log('📡 Fetching /api/generate...');
+    
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    console.log('📊 Response status:', res.status);
+    
+    // Try to get the response text first
+    const responseText = await res.text();
+    console.log('📄 Response text (first 200 chars):', responseText.substring(0, 200));
+    
+    // Try to parse as JSON
+    let data;
     try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
-      });
-      const data = await res.json();
-      setHtml(data.html);
-    } catch (error) {
-      console.error('Generation error:', error);
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('❌ Failed to parse JSON:', parseError);
+      throw new Error(`Server returned invalid JSON. Status: ${res.status}. Response: ${responseText.substring(0, 100)}`);
     }
+    
+    console.log('✅ Parsed data:', data);
+    
+    if (!res.ok) {
+      throw new Error(data.error || data.details || `HTTP ${res.status}`);
+    }
+    
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    if (!data.html) {
+      throw new Error('No HTML received from API');
+    }
+    
+    setHtml(data.html);
+    console.log('🎉 HTML set successfully, length:', data.html.length);
+    
+  } catch (error: any) {
+    console.error('❌ Generation error:', error);
+    setError(error.message || 'Failed to generate website. Please try again.');
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   const resetBuilder = () => {
     setConfig({ type: '', style: '', features: [], customDetails: '' });
