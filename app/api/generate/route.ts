@@ -54,15 +54,20 @@ export async function POST(req: NextRequest) {
 
 Requirements:
 - Single HTML file with embedded CSS and JavaScript
-- Modern, professional design with smooth animations
+- Modern, professional design with animations
 - Fully responsive (mobile, tablet, desktop)
+- Keep it CONCISE - don't create overly complex mega-files
 - Use semantic HTML5
-- Include beautiful gradients, shadows, and modern UI elements
-- Make it visually stunning and production-ready
+- Include beautiful gradients and modern UI
+- Make it visually stunning but COMPLETE
 - Use a cohesive color scheme
 - Include realistic placeholder content
 
-CRITICAL: Return ONLY the complete HTML code starting with <!DOCTYPE html>. No explanations, no markdown code blocks, just pure HTML.`
+CRITICAL: 
+1. Return ONLY complete, valid HTML starting with <!DOCTYPE html> and ending with </html>
+2. Keep the code efficient and not overly long
+3. No explanations, no markdown code blocks, just pure HTML
+4. Make sure to close ALL tags properly`
           }]
         }),
         signal: controller.signal
@@ -100,11 +105,25 @@ CRITICAL: Return ONLY the complete HTML code starting with <!DOCTYPE html>. No e
 
       // Clean up markdown if present
       htmlContent = htmlContent
-        .replace(/```html\n?/g, '')
+        .replace(/```html\n?/gi, '')
         .replace(/```\n?/g, '')
         .trim();
+      
+      // Verify it starts with DOCTYPE or <html>
+      if (!htmlContent.startsWith('<!DOCTYPE') && !htmlContent.startsWith('<html')) {
+        console.error('⚠️ HTML does not start with DOCTYPE or <html>');
+        console.error('First 200 chars:', htmlContent.substring(0, 200));
+      }
+      
+      // Check if HTML is complete
+      if (!htmlContent.includes('</html>')) {
+        console.warn('⚠️ HTML may be incomplete - missing closing </html> tag');
+        console.warn('Response may have been truncated. Consider simplifying the prompt.');
+      }
 
       console.log('📦 Sending HTML response, length:', htmlContent.length);
+      console.log('📦 First 100 chars:', htmlContent.substring(0, 100));
+      console.log('📦 Last 100 chars:', htmlContent.substring(htmlContent.length - 100));
 
       return NextResponse.json({ 
         html: htmlContent,
