@@ -49,7 +49,7 @@ const plans = [
     ],
     cta: 'Upgrade to Growth',
     highlighted: false,
-    stripeLink: 'price_growth' // Replace with actual Stripe price ID
+    stripeLink: 'prod_TdBpA76py4klHo' // Stripe price ID
   },
   {
     id: 'unlimited',
@@ -72,7 +72,7 @@ const plans = [
     ],
     cta: 'Upgrade to Unlimited',
     highlighted: true,
-    stripeLink: 'price_unlimited' // Replace with actual Stripe price ID
+    stripeLink: 'prod_TdBrlxrdJb7eCK' // Stripe price ID
   }
 ];
 
