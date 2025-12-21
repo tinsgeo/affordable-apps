@@ -29,7 +29,6 @@ export default function Dashboard() {
   });
   const [prompt, setPrompt] = useState('');
   const [html, setHtml] = useState('');
-  const [previewUrl, setPreviewUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPreview, setShowPreview] = useState(true);
@@ -75,27 +74,6 @@ export default function Dashboard() {
       generatePrompt();
     }
   }, [config]);
-
-  // Update iframe content when html changes
-  useEffect(() => {
-    if (html) {
-      // Clean up old URL
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-      
-      // Create blob URL for preview
-      const blob = new Blob([html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      setPreviewUrl(url);
-    }
-    
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [html]);
 
   const generatePrompt = () => {
     const typeDesc = websiteTypes.find(t => t.id === config.type)?.name || '';
@@ -179,7 +157,6 @@ export default function Dashboard() {
     setCurrentStep('type');
     setPrompt('');
     setHtml('');
-    setPreviewUrl('');
     setError('');
     setShowPreview(true);
   };
@@ -219,17 +196,26 @@ export default function Dashboard() {
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Affordable Apps</h1>
+              <h1 className="text-xl font-bold">AI Website Builder</h1>
               <p className="text-xs text-gray-400">{auth.currentUser?.email}</p>
             </div>
           </div>
-          <button
-            onClick={() => signOut(auth).then(() => router.push('/'))}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/pricing')}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg transition-all font-semibold"
+            >
+              <Zap className="w-4 h-4" />
+              <span className="hidden sm:inline">Upgrade</span>
+            </button>
+            <button
+              onClick={() => signOut(auth).then(() => router.push('/'))}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -276,6 +262,22 @@ export default function Dashboard() {
         {/* Step 1: Website Type */}
         {currentStep === 'type' && (
           <div className="max-w-6xl mx-auto">
+            {/* Free Tier Notice */}
+            <div className="mb-8 bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-yellow-200">
+                  <strong>Free Tier:</strong> You can generate up to 2 sites per month. 
+                  <button
+                    onClick={() => router.push('/pricing')}
+                    className="ml-2 underline hover:text-yellow-100 font-semibold"
+                  >
+                    Upgrade for unlimited generations →
+                  </button>
+                </p>
+              </div>
+            </div>
+
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold mb-4">What type of website do you need?</h2>
               <p className="text-xl text-gray-400">Choose the category that best fits your project</p>
@@ -517,6 +519,46 @@ export default function Dashboard() {
 
             {html && !error && (
               <>
+                {/* Upgrade Banner for Free Users */}
+                <div className="mb-8 bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-2xl p-6 border border-purple-500/30">
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                        <Sparkles className="w-6 h-6 text-yellow-400" />
+                        Love what you built? Unlock more!
+                      </h3>
+                      <p className="text-gray-300 mb-3">
+                        Upgrade to generate unlimited sites, deploy to Vercel with one click, and access advanced features.
+                      </p>
+                      <ul className="text-sm text-gray-400 space-y-1 mb-4">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-400" />
+                          Unlimited website generations
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-400" />
+                          One-click Vercel deployment
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-400" />
+                          AI-powered revisions and improvements
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-400" />
+                          Priority support & advanced templates
+                        </li>
+                      </ul>
+                    </div>
+                    <button
+                      onClick={() => router.push('/pricing')}
+                      className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all hover:scale-105 flex items-center gap-2 whitespace-nowrap"
+                    >
+                      <Zap className="w-5 h-5" />
+                      View Plans
+                    </button>
+                  </div>
+                </div>
+
                 <div className="flex justify-center gap-4 mb-8 flex-wrap">
                   <button
                     onClick={resetBuilder}
@@ -524,6 +566,20 @@ export default function Dashboard() {
                   >
                     <RefreshCw className="w-5 h-5" />
                     Start Over
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('🔍 HTML State Check:', {
+                        htmlLength: html?.length || 0,
+                        htmlExists: !!html,
+                        showPreview,
+                        first100: html?.substring(0, 100)
+                      });
+                      alert(`HTML length: ${html?.length || 0}\nPreview mode: ${showPreview}`);
+                    }}
+                    className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-bold transition-all flex items-center gap-2"
+                  >
+                    🔍 Debug State
                   </button>
                   <button
                     onClick={() => {
@@ -550,17 +606,24 @@ export default function Dashboard() {
 
                 <div className="border-4 border-purple-600 rounded-2xl overflow-hidden shadow-2xl">
                   {showPreview ? (
-                    previewUrl ? (
-                      <iframe 
-                        src={previewUrl}
-                        className="w-full h-[800px] bg-white" 
-                        title="Website Preview"
-                      />
-                    ) : (
-                      <div className="w-full h-[800px] bg-gray-900 flex items-center justify-center">
-                        <p className="text-gray-400">Loading preview...</p>
-                      </div>
-                    )
+                    <iframe 
+                      ref={(iframe) => {
+                        if (iframe && html) {
+                          console.log('🖼️ Writing to iframe, HTML length:', html.length);
+                          const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                          if (doc) {
+                            doc.open();
+                            doc.write(html);
+                            doc.close();
+                            console.log('✅ HTML written to iframe');
+                          } else {
+                            console.error('❌ Could not access iframe document');
+                          }
+                        }
+                      }}
+                      className="w-full h-[800px] bg-white" 
+                      title="Website Preview"
+                    />
                   ) : (
                     <pre className="w-full h-[800px] overflow-auto p-6 bg-gray-950 text-sm">
                       <code>{html}</code>
