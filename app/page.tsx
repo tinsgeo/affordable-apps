@@ -115,12 +115,20 @@ export default function InteractiveLanding() {
             </div>
             <span className="text-xl font-bold">Affordable Apps</span>
           </div>
-          <button 
-            onClick={handleAuthClick}
-            className="px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-all hover:scale-105 active:scale-95"
-          >
-            Sign In
-          </button>
+          <div className="flex items-center gap-4">
+            <a 
+              href="/pricing"
+              className="text-white hover:text-purple-300 transition-colors font-medium hidden sm:block"
+            >
+              Pricing
+            </a>
+            <button 
+              onClick={handleAuthClick}
+              className="px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-all hover:scale-105 active:scale-95"
+            >
+              Sign In
+            </button>
+          </div>
         </header>
 
         {/* Countdown Banner */}
