@@ -1,34 +1,82 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
+
+// Initialize Stripe with your secret key
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2023-10-16',
+});
 
 export async function POST(req: NextRequest) {
   try {
     const { priceId, planName } = await req.json();
 
-    // Initialize Stripe (you'll need to install: npm install stripe)
-    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    // Validate input
+    if (!priceId || !planName) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
 
-    // Create Checkout Session
+    // Get the app URL (for redirects)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+    // Optional: Get user email from Firebase auth if available
+    // You can add authentication check here and get user email
+    // const userEmail = await getUserEmailFromAuth();
+
+    // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
-          price: priceId, // Your Stripe Price ID (e.g., 'price_1ABC...')
+          price: priceId, // Stripe Price ID from your dashboard
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true&plan=${planName}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+      
+      // Success redirect (after payment)
+      success_url: `${appUrl}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}&plan=${encodeURIComponent(planName)}`,
+      
+      // Cancel redirect (if user cancels)
+      cancel_url: `${appUrl}/pricing?canceled=true`,
+      
+      // Additional settings
       automatic_tax: { enabled: true },
       allow_promotion_codes: true,
       billing_address_collection: 'required',
-      customer_email: undefined, // Add user email from Firebase auth if available
+      
+      // Optional: Pre-fill customer email if you have it
+      // customer_email: userEmail,
+      
+      // Metadata for tracking
+      metadata: {
+        planName: planName,
+      },
+      
+      // Subscription settings
+      subscription_data: {
+        metadata: {
+          planName: planName,
+        },
+      },
     });
 
-    return NextResponse.json({ url: session.url });
+    console.log('✅ Checkout session created:', session.id);
+
+    return NextResponse.json({ 
+      url: session.url,
+      sessionId: session.id 
+    });
+
   } catch (error: any) {
-    console.error('Stripe checkout error:', error);
+    console.error('❌ Stripe checkout error:', error);
+    
     return NextResponse.json(
-      { error: error.message },
+      { 
+        error: 'Failed to create checkout session',
+        details: error.message 
+      },
       { status: 500 }
     );
   }
