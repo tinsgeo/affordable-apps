@@ -196,7 +196,7 @@ export default function Dashboard() {
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">AI Website Builder</h1>
+              <h1 className="text-xl font-bold">Affordable Apps</h1>
               <p className="text-xs text-gray-400">{auth.currentUser?.email}</p>
             </div>
           </div>
@@ -432,14 +432,14 @@ export default function Dashboard() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold mb-4">Review your prompt</h2>
-              <p className="text-xl text-gray-400">This is what Claude will build for you</p>
+              <p className="text-xl text-gray-400">This is what will be built for you</p>
             </div>
 
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border border-purple-500/30 mb-8">
               <div className="flex items-start gap-3 mb-4">
                 <MessageSquare className="w-6 h-6 text-purple-400 mt-1" />
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold mb-3 text-purple-400">Your AI Prompt:</h3>
+                  <h3 className="text-lg font-bold mb-3 text-purple-400">Your Prompt:</h3>
                   <p className="text-lg leading-relaxed">{prompt}</p>
                 </div>
               </div>
@@ -483,7 +483,7 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-4xl font-bold mb-4">
-                {loading ? 'Claude is building your website...' : html ? 'Your website is ready!' : error ? 'Generation Failed' : 'Generating...'}
+                {loading ? 'We are building your website...' : html ? 'Your website is ready!' : error ? 'Generation Failed' : 'Generating...'}
               </h2>
               {loading && (
                 <div className="flex flex-col items-center gap-4">
@@ -491,7 +491,7 @@ export default function Dashboard() {
                     <RefreshCw className="w-6 h-6 animate-spin" />
                     <span className="text-lg">This usually takes 20-60 seconds</span>
                   </div>
-                  <p className="text-sm text-gray-400">Check browser console (F12) for detailed progress...</p>
+                  <p className="text-sm text-gray-400">Something amazing coming your way!</p>
                 </div>
               )}
               
